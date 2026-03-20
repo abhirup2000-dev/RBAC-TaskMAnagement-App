@@ -1,0 +1,138 @@
+<nav class="navbar navbar-expand-lg modern-navbar">
+  <div class="container">
+
+    <!-- Brand -->
+    <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="/dashboard">
+      <span>RBAC_TMS</span>
+    </a>
+
+    <!-- Toggle -->
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <i class="bi bi-list text-white fs-2"></i>
+    </button>
+
+    <!-- Nav -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+
+      <ul class="navbar-nav me-auto gap-lg-2">
+
+        <li class="nav-item">
+          <a class="nav-link nav-modern" href="/dashboard">
+            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link nav-modern" href="/records-view">
+            <i class="bi bi-collection me-1"></i>Records
+          </a>
+        </li>
+
+      </ul>
+
+      <!-- Right Section -->
+      <div class="d-flex  gap-3 mt-3 mt-lg-0">
+
+        <!-- User -->
+        <div class="user-pill d-flex align-items-center gap-2">
+          <i class="bi bi-person-circle"></i>
+          <span><%= user.empName %></span>
+
+          <% if (user.role === 'admin') { %>
+            <span class="badge role-badge bg-danger">Admin</span>
+          <% } else if (user.role === 'manager') { %>
+            <span class="badge role-badge bg-warning text-dark">Manager</span>
+          <% } else { %>
+            <span class="badge role-badge bg-secondary">Employee</span>
+          <% } %>
+        </div>
+
+        <!-- Logout -->
+        <form action="/logout" method="POST" class="m-0">
+          <button type="submit" class="btn logout-btn">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* Navbar Base */
+  .modern-navbar {
+    background: rgba(23, 77, 237, 0.844);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+
+  /* Brand */
+  .brand-icon {
+    font-size: 18px;
+    color: #fff;
+  }
+
+  .navbar-brand {
+    color: #fff !important;
+    font-size: 18px;
+  }
+
+  /* Links */
+  .nav-modern {
+    color: rgba(255,255,255,0.85) !important;
+    padding: 8px 14px;
+    border-radius: 10px;
+    transition: 0.2s;
+    font-weight: 500;
+  }
+
+  .nav-modern:hover {
+    background: rgba(255,255,255,0.15);
+    color: #fff !important;
+  }
+
+  /* User pill */
+  .user-pill {
+    background: rgba(255,255,255,0.15);
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: white;
+    font-size: 13px;
+    backdrop-filter: blur(8px);
+  }
+
+  .role-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 999px;
+  }
+
+  /* Logout */
+  .logout-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    padding: 6px 10px;
+    transition: 0.2s;
+  }
+
+  .logout-btn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.05);
+  }
+
+  /* Mobile spacing */
+  @media (max-width: 991px) {
+    .user-pill {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .logout-btn {
+      width: 100%;
+    }
+  }
+</style>

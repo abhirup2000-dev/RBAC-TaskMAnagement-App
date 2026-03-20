@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Records</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #eef2ff, #f8fafc);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 18px 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .badge-soft {
+      background: #4f46e5;
+      color: white;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    /* Inputs */
+    .form-control {
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      transition: 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+    }
+
+    /* Button */
+    .btn-dark {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      border: none;
+      border-radius: 10px;
+      transition: 0.2s;
+    }
+
+    .btn-dark:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(99,102,241,0.3);
+    }
+
+    /* Record Card */
+    .record-card {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .record-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      background: linear-gradient(90deg, #6366f1, #22c55e);
+    }
+
+    .record-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.1);
+    }
+
+    .record-title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .record-meta {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* Actions */
+    .action-btn {
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 12px;
+      transition: 0.2s;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Empty State */
+    .empty-box {
+      background: rgba(255,255,255,0.6);
+      border-radius: 16px;
+      padding: 40px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Modal */
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<%- include('layouts/navbar') %>
+
+<div class="container mt-4">
+
+  <!-- Top Bar -->
+  <div class="top-bar d-flex justify-content-between align-items-center mb-4">
+    <h5 class="fw-semibold mb-0">📁 Records</h5>
+    <span class="badge-soft"><%= records.length %> items</span>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Sidebar -->
+    <% if (permissions.includes('create_record')) { %>
+    <div class="col-lg-4">
+      <div class="sidebar-card">
+        <h6 class="fw-semibold mb-3">Create Record</h6>
+
+        <form action="/records-view/create" method="POST">
+          <input type="text" name="title" class="form-control mb-2" placeholder="Title" required>
+          <textarea name="description" class="form-control mb-3" rows="3" placeholder="Description" required></textarea>
+
+          <button class="btn btn-dark w-100">Create</button>
+        </form>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Records -->
+    <div class="col-lg-<%= permissions.includes('create_record') ? '8' : '12' %>">
+
+      <% if (records.length === 0) { %>
+        <div class="empty-box text-center text-muted">
+          <i class="bi bi-folder-x fs-1 mb-2"></i>
+          <p>No records available</p>
+        </div>
+      <% } else { %>
+
+      <div class="row g-3">
+        <% records.forEach(function(record) { %>
+
+        <div class="col-md-6">
+          <div class="record-card">
+
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="record-title"><%= record.title %></div>
+
+              <div class="d-flex gap-1">
+                <% if (permissions.includes('update_record')) { %>
+                  <button 
+                    class="btn btn-sm btn-outline-primary action-btn edit-btn"
+                    data-id="<%= record._id %>"
+                    data-title="<%= record.title %>"
+                    data-description="<%= record.description %>">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                <% } %>
+
+                <% if (permissions.includes('delete_record')) { %>
+                  <form action="/records-view/delete/<%= record._id %>" method="POST">
+                    <button class="btn btn-sm btn-outline-danger action-btn">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+
+            <p class="small text-muted mt-2 mb-2"><%= record.description %></p>
+
+            <div class="record-meta d-flex justify-content-between">
+              <span><i class="bi bi-person"></i> <%= record.createdByName %></span>
+              <span><%= new Date(record.createdAt).toLocaleDateString() %></span>
+            </div>
+
+          </div>
+        </div>
+
+        <% }); %>
+      </div>
+
+      <% } %>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header border-0">
+        <h6 class="fw-semibold">Edit Record</h6>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form id="editForm" method="POST">
+        <div class="modal-body">
+          <input type="text" id="editTitle" name="title" class="form-control mb-2" required>
+          <textarea id="editDescription" name="description" class="form-control" rows="3" required></textarea>
+        </div>
+
+        <div class="modal-footer border-0">
+          <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-dark">Save</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const id = this.dataset.id;
+      const title = this.dataset.title;
+      const description = this.dataset.description;
+
+      document.getElementById('editForm').action = '/records-view/update/' + id;
+      document.getElementById('editTitle').value = title;
+      document.getElementById('editDescription').value = description;
+
+      new bootstrap.Modal(document.getElementById('editModal')).show();
+    });
+  });
+</script>
+
+</body>
+</html>
