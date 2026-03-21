@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const RateLimit = require('../utils/limiter')
 
 const viewController = require('../controller/viewController');
 const { setUserFromCookie, requireAuth } = require('../middleware/middleware');
@@ -11,10 +12,12 @@ router.use(setUserFromCookie);
 router.get('/', viewController.viewLogin);
 router.get('/register', viewController.viewRegister);
 
+
 // Auth form handlers
-router.post('/auth/login', viewController.handleLogin);
+router.post('/auth/login', RateLimit, viewController.handleLogin);
 router.post('/auth/register', viewController.empRegister);
 router.post('/logout', viewController.logout);
+
 
 // Protected pages
 router.get('/dashboard', requireAuth, viewController.showDashboard);

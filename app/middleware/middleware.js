@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const statusCode = require('../utils/StatusCode')
 
 // Role-based permissions map
 const ROLE_PERMISSIONS = {
@@ -8,7 +9,7 @@ const ROLE_PERMISSIONS = {
 };
 
 // Auth middleware
-const authMiddleware = (req, res, next) => {
+const authCheckMiddleware = (req, res, next) => {
   const token =
     req.cookies?.token ||
     req.body?.token ||
@@ -17,7 +18,7 @@ const authMiddleware = (req, res, next) => {
     req.headers["x-access-token"];
 
   if (!token) {
-    return res.status(400).json({
+    return res.status(statusCode.BAD_REQUEST).json({
       success: false,
       message: "Token is required!",
     });
@@ -26,9 +27,8 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.user = decoded;
-    console.log("Auth done:", req.user.empEmail, "| role:", req.user.role);
   } catch (error) {
-    return res.status(401).json({
+    return res.status(statusCode.UNAUTHORIZED).json({
       success: false,
       message: "Invalid token",
     });
@@ -37,11 +37,11 @@ const authMiddleware = (req, res, next) => {
   return next();
 };
 
-// Permission middleware factory — checks if req.user has the required permission
+// checks if req.user has the required permission
 const authorizePermission = (requiredPermission) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({
+      return res.status(statusCode.UNAUTHORIZED).json({
         success: false,
         message: "Unauthorized: not logged in",
       });
@@ -50,7 +50,7 @@ const authorizePermission = (requiredPermission) => {
     const permissions = ROLE_PERMISSIONS[req.user.role] || [];
 
     if (!permissions.includes(requiredPermission)) {
-      return res.status(403).json({
+      return res.status(statusCode.FORBIDDEN).json({
         success: false,
         message: `Forbidden: '${req.user.role}' role does not have '${requiredPermission}' permission`,
       });
@@ -85,7 +85,7 @@ const requireAuth = (req, res, next) => {
 };
 
 module.exports = {
-  authMiddleware,
+  authCheckMiddleware,
   authorizePermission,
   setUserFromCookie,
   requireAuth,

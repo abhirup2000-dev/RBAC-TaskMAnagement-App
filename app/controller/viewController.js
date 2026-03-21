@@ -1,5 +1,5 @@
-const Record = require("../model/recordmodel");
-const Employee = require("../model/employeemodel");
+const Record = require("../model/recordModel");
+const Employee = require("../model/employeeModel");
 const jwt = require("jsonwebtoken");
 const { ROLE_PERMISSIONS } = require("../middleware/middleware");
 

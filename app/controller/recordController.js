@@ -1,4 +1,4 @@
-const Record = require("../model/recordmodel");
+const Record = require("../model/recordModel");
 const statusCode = require("../utils/StatusCode");
 
 class RecordController {

@@ -1,4 +1,4 @@
-const Employee = require("../model/employeemodel");
+const Employee = require("../model/employeeModel");
 const jwt = require("jsonwebtoken");
 const { ROLE_PERMISSIONS } = require("../middleware/middleware");
 const statusCode = require("../utils/StatusCode");
