@@ -12,7 +12,7 @@ class RecordController {
         createdByRole: req.user.role,
       };
 
-      const createdRecord = await Record.create(data);
+      const createdRecord = await Record.save(data);
       if (createdRecord) {
         return res.status(statusCode.CREATED).json({
           success: true,
