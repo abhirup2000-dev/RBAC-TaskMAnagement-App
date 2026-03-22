@@ -1,6 +1,7 @@
 const Record = require("../model/recordModel");
 const Employee = require("../model/employeeModel");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const { ROLE_PERMISSIONS } = require("../middleware/middleware");
 
 const statusCode = require("../utils/StatusCode");
@@ -9,23 +10,17 @@ class ViewController {
   // GET /
   viewLogin(req, res) {
     if (req.user) return res.redirect("/dashboard");
-    res.render("index", { error: null,
-      title: 'Employee Login'
-    });
+    res.render("index", { error: null, title: "Employee Login" });
   }
 
   adminLogin(req, res) {
     if (req.user) return res.redirect("/dashboard");
-    res.render("admin/adminlogin", { error: null,
-      title: 'Admin Login'
-    });
+    res.render("admin/adminlogin", { error: null, title: "Admin Login" });
   }
 
   managerLogin(req, res) {
     if (req.user) return res.redirect("/dashboard");
-    res.render("manager/managerlogin", { error: null,
-      title: 'Manager Login'
-    });
+    res.render("manager/managerlogin", { error: null, title: "Manager Login" });
   }
 
   // GET /register
@@ -70,18 +65,29 @@ class ViewController {
     }
   }
 
-  // POST /auth/login  (form submit)
+  // POST /auth/login
   async handleLogin(req, res) {
     try {
       const { empEmail, empPassword } = req.body;
+
       const employee = await Employee.findOne({ empEmail });
 
-      if (!employee || employee.empPassword !== empPassword) {
+      // ❌ check user first
+      if (!employee) {
+        return res.render("index", { error: "Invalid email or password" });
+      }
+
+      // 🔥 compare hashed password
+      const isMatch = await bcrypt.compare(empPassword, employee.empPassword);
+
+      if (!isMatch) {
         return res.render("index", { error: "Invalid email or password" });
       }
 
       const permissions = ROLE_PERMISSIONS[employee.empRole] || [];
-      const token = jwt.sign(
+
+      // 🔥 Access Token (short-lived)
+      const accessToken = jwt.sign(
         {
           id: employee._id,
           empName: employee.empName,
@@ -91,34 +97,44 @@ class ViewController {
           permissions: permissions,
         },
         process.env.JWT_SECRET_KEY,
-        { expiresIn: "1h" },
+        { expiresIn: "15m" },
       );
 
-      res.cookie("token", token, { httpOnly: true, maxAge: 3600000 });
+      //cookies
+      res.cookie("token", accessToken, {
+        httpOnly: true,
+        maxAge: 15 * 60 * 1000,
+      });
+
       return res.redirect("/dashboard");
     } catch (error) {
+      console.error(error);
       return res.render("index", { error: "Login failed. Try again." });
     }
   }
 
-  // POST /auth/register  (form submit)
+  // POST /auth/register
   async empRegister(req, res) {
     try {
       const { empName, empEmail, empPassword, empDepartment, empRole } =
         req.body;
-      const existing = await Employee.findOne({ empEmail });
 
+      const existing = await Employee.findOne({ empEmail });
       if (existing) {
         return res.render("register", { error: "Email already registered" });
       }
 
+      //HASH PASSWORD
+      const hashedPassword = await bcrypt.hash(empPassword, 10);
+
       await Employee.create({
         empName,
         empEmail,
-        empPassword,
+        empPassword: hashedPassword, //store hashed
         empDepartment,
         empRole: empRole || "employee",
       });
+
       return res.redirect("/");
     } catch (error) {
       return res.render("register", {

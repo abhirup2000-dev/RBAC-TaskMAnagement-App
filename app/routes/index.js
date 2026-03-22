@@ -10,7 +10,7 @@ const empRoutes = require('./empRoute');
 
 router.use('/records', recordRoutes);
 
-router.use('/', empRoutes);
+router.use(empRoutes);
 
 
 
